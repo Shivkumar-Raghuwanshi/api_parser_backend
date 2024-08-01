@@ -1,0 +1,16 @@
+Key,Value
+base_url,https://api.notion.com
+authentication_type,Bearer Token
+authentication_header,Authorization: Bearer {NOTION_API_KEY}
+required_headers_0_name,Notion-Version
+required_headers_0_value,2022-06-28
+endpoints_0_name,Retrieve a Page
+endpoints_0_method,GET
+endpoints_0_path,/v1/pages/{page_id}
+endpoints_0_description,Retrieves a Page object using the ID specified.
+endpoints_0_parameters_0_name,page_id
+endpoints_0_parameters_0_type,path
+endpoints_0_parameters_0_required,True
+endpoints_0_parameters_0_description,Identifier for a Notion page
+endpoints_0_example_request,GET https://api.notion.com/v1/pages/b55c9c91-384d-452b-81db-d1ef79372b75
+return_format,Not specified in the given documentation

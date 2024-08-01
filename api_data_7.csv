@@ -1,0 +1,39 @@
+Key,Value
+error,Failed to decode JSON from the response.
+raw_response,"Here's the parsed API documentation in JSON format:
+
+```json
+{
+  ""baseUrl"": ""https://api.notion.com"",
+  ""authentication"": {
+    ""type"": ""Bearer Token"",
+    ""headerName"": ""Authorization"",
+    ""headerValue"": ""Bearer {NOTION_API_KEY}""
+  },
+  ""requiredHeaders"": [
+    {
+      ""name"": ""Notion-Version"",
+      ""value"": ""2022-06-28""
+    }
+  ],
+  ""endpoints"": [
+    {
+      ""name"": ""Retrieve a Page"",
+      ""method"": ""GET"",
+      ""path"": ""/v1/pages/{page_id}"",
+      ""description"": ""Retrieves a Page object using the ID specified."",
+      ""parameters"": [
+        {
+          ""name"": ""page_id"",
+          ""type"": ""path"",
+          ""required"": true,
+          ""description"": ""Identifier for a Notion page""
+        }
+      ],
+      ""exampleRequest"": ""GET https://api.notion.com/v1/pages/b55c9c91-384d-452b-81db-d1ef79372b75""
+    }
+  ]
+}
+```
+
+This JSON object captures the key elements of the provided API documentation, including the base URL, authentication method, required headers, and the details of the ""Retrieve a Page"" endpoint."
