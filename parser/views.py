@@ -13,8 +13,10 @@ import logging
 import os
 from django.core.files.storage import default_storage
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
+# Generic API views for CRUD operations on APIDocument
 class APIDocumentList(generics.ListCreateAPIView):
     queryset = APIDocument.objects.all()
     serializer_class = APIDocumentSerializer
@@ -23,6 +25,7 @@ class APIDocumentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = APIDocument.objects.all()
     serializer_class = APIDocumentSerializer
 
+# Generic API views for listing and retrieving GeneratedCode
 class GeneratedCodeList(generics.ListAPIView):
     queryset = GeneratedCode.objects.all()
     serializer_class = GeneratedCodeSerializer
@@ -31,6 +34,7 @@ class GeneratedCodeDetail(generics.RetrieveAPIView):
     queryset = GeneratedCode.objects.all()
     serializer_class = GeneratedCodeSerializer
 
+# Generic API views for listing and retrieving APIData
 class APIDataList(generics.ListAPIView):
     queryset = APIData.objects.all()
     serializer_class = APIDataSerializer
@@ -39,12 +43,14 @@ class APIDataDetail(generics.RetrieveAPIView):
     queryset = APIData.objects.all()
     serializer_class = APIDataSerializer
 
+# Custom API view for interpreting API documentation
 class InterpretAPIDocumentation(APIView):
     def post(self, request):
         serializer = APIDocumentSerializer(data=request.data)
         if serializer.is_valid():
             api_doc = serializer.save()
             
+            # Parse API documentation
             parser = APIDocParser()
             try:
                 api_info = parser.parse_documentation(api_doc.content)
@@ -52,6 +58,7 @@ class InterpretAPIDocumentation(APIView):
                 logger.error(f"Error parsing API documentation: {str(e)}")
                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            # Generate code based on parsed API info
             generator = CodeGenerator()
             try:
                 code_response = generator.generate_code(api_info)
@@ -62,11 +69,13 @@ class InterpretAPIDocumentation(APIView):
                 logger.error(f"Error generating code: {str(e)}")
                 return Response({'error': 'Failed to generate code'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            # Create GeneratedCode instance
             generated_code = GeneratedCode.objects.create(
                 api_document=api_doc,
                 code=code,
             )
 
+            # Process API data
             data_processor = DataProcessor()
             try:
                 processed_data = data_processor.process_json(json.dumps(api_info))
@@ -78,6 +87,7 @@ class InterpretAPIDocumentation(APIView):
                 # Save CSV file using FileStorage
                 file_path = FileStorage.save_file(filename, csv_content)
                 
+                # Create APIData instance
                 api_data = APIData.objects.create(
                     generated_code=generated_code,
                     data=processed_data,
@@ -87,6 +97,7 @@ class InterpretAPIDocumentation(APIView):
                 logger.error(f"Error processing API data: {str(e)}")
                 return Response({'error': 'Failed to process API data'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            # Return created data
             return Response({
                 'api_doc': APIDocumentSerializer(api_doc).data,
                 'generated_code': GeneratedCodeSerializer(generated_code).data,
@@ -94,6 +105,7 @@ class InterpretAPIDocumentation(APIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Custom API view for executing generated code (disabled for security)
 class ExecuteGeneratedCode(APIView):
     def post(self, request):
         generated_code_id = request.data.get('generated_code_id')
@@ -107,6 +119,7 @@ class ExecuteGeneratedCode(APIView):
             'code': generated_code.code
         })
 
+# Custom API view for retrieving the latest generated code
 class LatestGeneratedCodeView(APIView):
     def get(self, request):
         latest_code = GeneratedCode.objects.order_by('-created_at').first()
@@ -115,6 +128,7 @@ class LatestGeneratedCodeView(APIView):
             return Response(serializer.data)
         return Response(None)
 
+# Custom API view for retrieving the latest API data
 class LatestAPIDataView(APIView):
     def get(self, request):
         latest_data = APIData.objects.order_by('-created_at').first()
@@ -123,6 +137,7 @@ class LatestAPIDataView(APIView):
             return Response(serializer.data)
         return Response(None)
 
+# Custom API view for downloading generated code
 class DownloadGeneratedCode(APIView):
     def get(self, request, pk=None):
         if pk:
@@ -143,6 +158,7 @@ class DownloadGeneratedCode(APIView):
             logger.error(f"Error saving or opening file: {filename}")
             return Response({'error': 'Failed to generate file'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Custom API view for downloading CSV files
 class DownloadCSVFile(APIView):
     def get(self, request, pk=None):
         if pk:
@@ -171,6 +187,7 @@ class DownloadCSVFile(APIView):
             logger.error(f"Error opening file: {file_path}")
             return Response({'error': 'Failed to open file'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Custom API view for listing CSV files
 class ListCSVFiles(APIView):
     def get(self, request):
         api_data = APIData.objects.all().order_by('-created_at')
